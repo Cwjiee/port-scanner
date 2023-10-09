@@ -9,5 +9,9 @@ func main() {
 
 	fmt.Println("port scanning")
 	results := port.ScanAllPorts("localhost")
+	// port.ScanIcmpPort()
 	fmt.Println(results)
+
+	widescanresults := port.WideScan("localhost")
+	fmt.Println(widescanresults)
 }
