@@ -57,32 +57,28 @@ func ScanPort(protocol, hostname string, port int) ScanResult {
 	return result
 }
 
-func ScanAllPorts(hostname string) []ScanResult {
+func ScanAllPorts(protocol string, hostname string) []ScanResult {
 	
 	var results []ScanResult
 
 	for i := 0; i <= 1024; i++ {
-		results = append(results, ScanPort("tcp", hostname, i))
-	}
-
-	for i := 0; i <= 1024; i++ {
-		results = append(results, ScanPort("udp", hostname, i))
-	}
-
-	return results
-}
-
-func WideScan(hostname string) []ScanResult {
-
-	var results []ScanResult
-
-	for i := 0; i <= 49152; i++ {
-		results = append(results, ScanPort("tcp", hostname, i))
-	}
-
-	for i := 0; i <= 49152; i++ {
-		results = append(results, ScanPort("udp", hostname, i))
+		// results = append(results, ScanPort("tcp", hostname, i))
+		result := ScanPort(protocol, hostname, i)
+		results = append(results, result)
 	}
 
 	return results
 }
+
+ func WideScan(protocol string, hostname string) []ScanResult {
+
+ 	var results []ScanResult
+
+ 	for i := 0; i <= 49152; i++ {
+		// results = append(results, ScanPort("tcp", hostname, i))
+		result := ScanPort(protocol, hostname, i)
+		results = append(results, result)
+	}
+
+ 	return results
+ }
