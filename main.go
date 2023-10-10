@@ -2,11 +2,14 @@ package main
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/Cwjiee/port-scanner/port"
+	"github.com/Cwjiee/port-scanner/timer"
 )
 
 func main() {
-
+	defer timer.TimeTrack(time.Now())
 	fmt.Println("port scanning")
 	// port.ScanIcmpPort()
 	hostname := "localhost"
