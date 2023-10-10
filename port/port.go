@@ -2,12 +2,12 @@ package port
 
 import (
 	"net"
-	"time"
 	"strconv"
+	"sync"
+	"time"
 	/* "os"
 	"fmt"
-	"github.com/tatsushid/go-fastping" */
-)
+	"github.com/tatsushid/go-fastping" */)
 
 type ScanResult struct {
 	Port   string
@@ -41,44 +41,40 @@ func ScanIcmpPort() {
 }
 */
 
-func ScanPort(protocol, hostname string, port int) ScanResult {
-	
+func ScanPort(protocol, hostname string, port int, wg *sync.WaitGroup, results chan<- ScanResult) {
+	defer wg.Done()
+
 	result := ScanResult{Port: strconv.Itoa(port) + string("/") + protocol}
 	address := hostname + ":" + strconv.Itoa(port)
 	conn, err := net.DialTimeout(protocol, address, 60*time.Second)
 
 	if err != nil {
 		result.Status = "Closed"
-		return result
+	} else {
+		conn.Close()
+		result.Status = "Open"
 	}
 
-	conn.Close()
-	result.Status = "Open"
-	return result
+	results <- result
 }
 
-func ScanAllPorts(protocol string, hostname string) []ScanResult {
-	
-	var results []ScanResult
+func WideScan(protocol string, hostname string) []ScanResult {
+	var wg sync.WaitGroup
+	results := make(chan ScanResult)
 
-	for i := 0; i <= 1024; i++ {
-		// results = append(results, ScanPort("tcp", hostname, i))
-		result := ScanPort(protocol, hostname, i)
-		results = append(results, result)
+	for i := 0; i <= 49152; i++ {
+		wg.Add(1)
+		go ScanPort(protocol, hostname, i, &wg, results)
 	}
 
-	return results
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
+	var scanResults []ScanResult
+	for result := range results {
+		scanResults = append(scanResults, result)
+	}
+	return scanResults
 }
-
- func WideScan(protocol string, hostname string) []ScanResult {
-
- 	var results []ScanResult
-
- 	for i := 0; i <= 49152; i++ {
-		// results = append(results, ScanPort("tcp", hostname, i))
-		result := ScanPort(protocol, hostname, i)
-		results = append(results, result)
-	}
-
- 	return results
- }
